@@ -8,7 +8,7 @@ sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
-from app.scripts.GroupSwitch.main import *
+from app.switch import load_switch, save_switch
 from app.scripts.GroupManager.group_management import *
 
 
