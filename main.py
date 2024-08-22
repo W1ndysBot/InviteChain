@@ -164,7 +164,7 @@ async def handle_InviteChain_group_notice(websocket, msg):
         group_id = msg.get("group_id", "")
         if load_InviteChain_switch(group_id):
             if msg["notice_type"] == "group_increase":
-                if sub_type == "invite":
+                if sub_type == "invite" or sub_type == "approve":
                     await save_invite_chain(group_id, user_id, operator_id)
                     await send_group_msg(
                         websocket,
