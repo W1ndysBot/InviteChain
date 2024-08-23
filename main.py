@@ -176,7 +176,7 @@ async def handle_InviteChain_group_notice(websocket, msg):
         logging.error(f"处理邀请链时发生错误: {e}")
 
 
-# 处理邀请链群消息
+# 管理邀请链
 async def handle_InviteChain_group_message(websocket, msg):
 
     user_id = msg["user_id"]
@@ -187,9 +187,9 @@ async def handle_InviteChain_group_message(websocket, msg):
 
     if is_authorized(role, user_id):
         # 查看邀请链
-        if raw_message.startswith("ic-list "):
+        if raw_message.startswith("ic-list"):  # 修改命令格式，去除空格
             if load_InviteChain_switch(group_id):
-                target_user_id = raw_message.split()[1]
+                target_user_id = raw_message[6:]  # 直接获取命令后的内容
                 # 修改正则表达式以匹配新的CQ码格式
                 match = re.search(r"\[CQ:at,qq=(\d+),name=.*\]", target_user_id)
                 if match:
