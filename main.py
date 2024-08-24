@@ -164,11 +164,15 @@ async def handle_InviteChain_group_notice(websocket, msg):
         group_id = msg.get("group_id", "")
         role = msg.get("sender", {}).get("role", "")
 
+        # logging.info(f"操作者 {operator_id} 的角色 {operator_role}")
+
+        # 限定范围，只处理入群事件
+        if sub_type != "group_increase":
+            return
+
         # 获取操作者的信息
         operator_info = await get_group_member_info(websocket, group_id, operator_id)
         operator_role = operator_info.get("data", {}).get("role", "")
-        # logging.info(f"操作者 {operator_id} 的角色 {operator_role}")
-
         # 如果操作者是群主或管理或root，则不记录邀请链
         if is_authorized(operator_role, operator_id):
             logging.info(f"操作者 {operator_id} 有管理权限，不记录邀请链")
