@@ -162,6 +162,18 @@ async def handle_InviteChain_group_notice(websocket, msg):
         sub_type = msg.get("sub_type", "")
         user_id = msg.get("user_id", "")
         group_id = msg.get("group_id", "")
+        role = msg.get("sender", {}).get("role", "")
+
+        # 获取操作者的信息
+        operator_info = await get_group_member_info(websocket, group_id, operator_id)
+        operator_role = operator_info.get("data", {}).get("role", "")
+        # logging.info(f"操作者 {operator_id} 的角色 {operator_role}")
+
+        # 如果操作者是群主或管理或root，则不记录邀请链
+        if is_authorized(operator_role, operator_id):
+            logging.info(f"操作者 {operator_id} 有管理权限，不记录邀请链")
+            return
+
         if load_InviteChain_switch(group_id):
             if msg["notice_type"] == "group_increase":
                 if sub_type == "invite" or sub_type == "approve":
