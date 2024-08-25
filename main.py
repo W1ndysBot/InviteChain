@@ -207,7 +207,7 @@ async def handle_InviteChain_group_message(websocket, msg):
             if load_InviteChain_switch(group_id):
                 target_user_id = raw_message[6:]  # 直接获取命令后的内容
                 # 修改正则表达式以匹配新的CQ码格式
-                match = re.search(r"\[CQ:at,qq=(\d+),name=.*\]", target_user_id)
+                match = re.search(r"\[CQ:at,qq=(\d+)\]", target_user_id)
                 if match:
                     target_user_id = match.group(1)  # 提取QQ号
                     logging.info(f"查看邀请链 {target_user_id}")
