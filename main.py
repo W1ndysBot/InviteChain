@@ -162,12 +162,12 @@ async def handle_InviteChain_group_notice(websocket, msg):
         sub_type = msg.get("sub_type", "")
         user_id = msg.get("user_id", "")
         group_id = msg.get("group_id", "")
-        role = msg.get("sender", {}).get("role", "")
+        notice_type = msg.get("notice_type", "")
 
         # logging.info(f"操作者 {operator_id} 的角色 {operator_role}")
 
         # 限定范围，只处理入群事件
-        if sub_type != "group_increase":
+        if notice_type != "group_increase":
             return
 
         # 获取操作者的信息
