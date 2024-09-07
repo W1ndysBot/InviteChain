@@ -192,6 +192,21 @@ async def handle_InviteChain_group_notice(websocket, msg):
         logging.error(f"处理邀请链时发生错误: {e}")
 
 
+# 邀请链菜单
+async def InviteChain(websocket, group_id, message_id):
+    message = (
+        f"[CQ:reply,id={message_id}]\n"
+        + """
+邀请链系统
+
+ic-on 开启邀请链
+ic-off 关闭邀请链
+ic-list@查看邀请链
+"""
+    )
+    await send_group_msg(websocket, group_id, message)
+
+
 # 管理邀请链
 async def handle_InviteChain_group_message(websocket, msg):
 
@@ -200,6 +215,9 @@ async def handle_InviteChain_group_message(websocket, msg):
     raw_message = msg["raw_message"]
     role = msg["sender"]["role"]
     message_id = int(msg["message_id"])
+
+    if raw_message == "invitechain":
+        await InviteChain(websocket, group_id, message_id)
 
     if is_authorized(role, user_id):
         # 查看邀请链
