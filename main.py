@@ -199,9 +199,9 @@ async def InviteChain(websocket, group_id, message_id):
         + """
 邀请链系统
 
-ic-on 开启邀请链
-ic-off 关闭邀请链
-ic-list@查看邀请链
+icon 开启邀请链
+icoff 关闭邀请链
+iclist@查看邀请链
 """
     )
     await send_group_msg(websocket, group_id, message)
@@ -221,18 +221,16 @@ async def handle_InviteChain_group_message(websocket, msg):
 
         if is_authorized(role, user_id):
             # 查看邀请链
-            if raw_message.startswith("ic-list"):  # 修改命令格式，去除空格
+            if raw_message.startswith("iclist"):  # 修改命令格式，去除空格
                 if load_InviteChain_switch(group_id):
-                    target_user_id = raw_message[6:]  # 直接获取命令后的内容
-                    # 修改正则表达式以匹配新的CQ码格式
-                    match = re.search(r"\[CQ:at,qq=(\d+)\]", target_user_id)
+                    match = re.search(r"(\d+)", raw_message)  # 提取QQ号
                     if match:
-                        target_user_id = match.group(1)  # 提取QQ号
+                        target_user_id = match.group(1)
                         logging.info(f"查看邀请链 {target_user_id}")
                         await view_InviteChain(
                             websocket, group_id, target_user_id, message_id
                         )
-            if raw_message == "ic-on":
+            if raw_message == "icon":
                 logging.info(f"开启邀请链 {group_id}")
                 if load_InviteChain_switch(group_id):
                     await send_group_msg(
@@ -247,7 +245,7 @@ async def handle_InviteChain_group_message(websocket, msg):
                         group_id,
                         f"[CQ:reply,id={message_id}] 邀请链功能已开启。",
                     )
-            if raw_message == "ic-off":
+            if raw_message == "icoff":
                 logging.info(f"关闭邀请链 {group_id}")
                 if load_InviteChain_switch(group_id):
                     save_InviteChain_switch(group_id, False)
