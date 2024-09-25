@@ -109,7 +109,7 @@ async def view_InviteChain(websocket, group_id, target_user_id, message_id):
             messages = []
             message_content = ""
             for index, inviter in enumerate(chain):
-                message_content += f"【{inviter['operator_id']}】邀请了【{inviter['user_id']}】（{inviter['type']}）\n邀请时间：{inviter['date']}\n\n"
+                message_content += f"[{inviter['operator_id']}]邀请了[{inviter['user_id']}]\n邀请类型：{inviter['type']}\n邀请时间：{inviter['date']}\n\n"
                 if (index + 1) % 5 == 0 or index == len(
                     chain
                 ) - 1:  # 每五条或者最后一条
