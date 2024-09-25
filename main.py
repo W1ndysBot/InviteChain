@@ -129,11 +129,13 @@ async def view_InviteChain(websocket, group_id, target_user_id, message_id):
             invite_chain_message = f"[CQ:reply,id={message_id}]"
             invite_chain_message += "邀请链:\n\n"
             for inviter in chain:
-                invite_chain_message += f"【{inviter['operator_id']}】邀请了【{inviter['user_id']}】（{inviter['type']}）\n邀请时间：{inviter['date']}\n\n"
+                invite_chain_message += f"[{inviter['operator_id']}]邀请了[{inviter['user_id']}]\n邀请类型：{inviter['type']}\n邀请时间：{inviter['date']}\n\n"
             await send_group_msg(websocket, group_id, invite_chain_message)
     else:
         invite_chain_message = "没有找到相关的邀请链。"
-        await send_group_msg(websocket, group_id, invite_chain_message)
+        await send_group_msg(
+            websocket, group_id, f"[CQ:reply,id={message_id}]{invite_chain_message}"
+        )
 
 
 # 保存邀请链
