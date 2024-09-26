@@ -66,14 +66,14 @@ def load_InviteChain(group_id):
 async def view_InviteChain(websocket, group_id, target_user_id, message_id):
     if not load_InviteChain_switch(group_id):
         await send_group_msg(
-            websocket, group_id, f"[CQ:reply,id={message_id}] 邀请链功能已关闭。"
+            websocket, group_id, f"[CQ:reply,id={message_id}]邀请链功能已关闭。"
         )
         return
 
     invite_chain = load_InviteChain(group_id)
     if not invite_chain:
         await send_group_msg(
-            websocket, group_id, f"[CQ:reply,id={message_id}] 没有找到邀请链。"
+            websocket, group_id, f"[CQ:reply,id={message_id}]没有找到邀请链。"
         )
         return
 
@@ -108,7 +108,7 @@ async def view_InviteChain(websocket, group_id, target_user_id, message_id):
             await send_group_msg(
                 websocket,
                 group_id,
-                f"[CQ:reply,id={message_id}] 发现黑名单用户: {', '.join(blacklisted_users)}",
+                f"[CQ:reply,id={message_id}]在邀请链中发现了黑名单用户: {', '.join(blacklisted_users)}，请注意甄别所有相关用户的身份",
             )
             return
 
@@ -116,7 +116,7 @@ async def view_InviteChain(websocket, group_id, target_user_id, message_id):
             await send_group_msg(
                 websocket,
                 group_id,
-                f"[CQ:reply,id={message_id}] 邀请链消息过长，将合并发送，共{len(chain)}条，请耐心等待。",
+                f"[CQ:reply,id={message_id}]邀请链消息过长，将合并发送，共{len(chain)}条，请耐心等待。",
             )
             # 每五条信息创建一个节点
             messages = []
@@ -251,14 +251,14 @@ async def handle_InviteChain_group_message(websocket, msg):
                     await send_group_msg(
                         websocket,
                         group_id,
-                        f"[CQ:reply,id={message_id}] 邀请链功能已开启，无需再次开启。",
+                        f"[CQ:reply,id={message_id}]邀请链功能已开启，无需再次开启。",
                     )
                 else:
                     save_InviteChain_switch(group_id, True)
                     await send_group_msg(
                         websocket,
                         group_id,
-                        f"[CQ:reply,id={message_id}] 邀请链功能已开启。",
+                        f"[CQ:reply,id={message_id}]邀请链功能已开启。",
                     )
             if raw_message == "icoff":
                 logging.info(f"关闭邀请链 {group_id}")
@@ -267,13 +267,13 @@ async def handle_InviteChain_group_message(websocket, msg):
                     await send_group_msg(
                         websocket,
                         group_id,
-                        f"[CQ:reply,id={message_id}] 邀请链功能已关闭。",
+                        f"[CQ:reply,id={message_id}]邀请链功能已关闭。",
                     )
                 else:
                     await send_group_msg(
                         websocket,
                         group_id,
-                        f"[CQ:reply,id={message_id}] 邀请链功能已关闭，无需再次关闭。",
+                        f"[CQ:reply,id={message_id}]邀请链功能已关闭，无需再次关闭。",
                     )
     except Exception as e:
         logging.error(f"处理邀请链消息时发生错误: {e}")
