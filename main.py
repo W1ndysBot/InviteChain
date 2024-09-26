@@ -10,7 +10,7 @@ sys.path.append(
 
 from app.switch import load_switch, save_switch
 from app.scripts.GroupManager.group_management import *
-
+from app.scripts.BlacklistSystem.main import is_blacklisted
 
 from app.api import *
 from app.config import owner_id
@@ -99,6 +99,19 @@ async def view_InviteChain(websocket, group_id, target_user_id, message_id):
     find_invite_chain(target_user_id, chain, visited)
 
     if chain:
+        blacklisted_users = [
+            inviter["user_id"]
+            for inviter in chain
+            if is_blacklisted(group_id, inviter["user_id"])
+        ]
+        if blacklisted_users:
+            await send_group_msg(
+                websocket,
+                group_id,
+                f"[CQ:reply,id={message_id}] 发现黑名单用户: {', '.join(blacklisted_users)}",
+            )
+            return
+
         if len(chain) > 10:  # 设置超过10条消息时使用合并消息发送
             await send_group_msg(
                 websocket,
@@ -212,11 +225,11 @@ iclist@查看邀请链
 # 管理邀请链
 async def handle_InviteChain_group_message(websocket, msg):
     try:
-        user_id = msg["user_id"]
-        group_id = msg["group_id"]
-        raw_message = msg["raw_message"]
-        role = msg["sender"]["role"]
-        message_id = int(msg["message_id"])
+        user_id = str(msg.get("user_id"))
+        group_id = str(msg.get("group_id"))
+        raw_message = str(msg.get("raw_message"))
+        role = str(msg.get("sender", {}).get("role"))
+        message_id = str(msg.get("message_id"))
 
         if raw_message == "invitechain":
             await InviteChain(websocket, group_id, message_id)
