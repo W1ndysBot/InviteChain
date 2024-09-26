@@ -110,7 +110,6 @@ async def view_InviteChain(websocket, group_id, target_user_id, message_id):
                 group_id,
                 f"[CQ:reply,id={message_id}]在邀请链中发现了黑名单用户: {', '.join(blacklisted_users)}，请注意甄别所有相关用户的身份",
             )
-            return
 
         if len(chain) > 10:  # 设置超过10条消息时使用合并消息发送
             await send_group_msg(
