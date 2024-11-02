@@ -199,7 +199,20 @@ async def handle_InviteChain_group_notice(websocket, msg):
                     await send_group_msg(
                         websocket,
                         group_id,
-                        f"已记录 [CQ:at,qq={user_id}] 的邀请链，操作者为 [CQ:at,qq={operator_id}] ，请勿在群内发送违规信息",
+                        f"[+]已记录[CQ:at,qq={user_id}][{user_id}]的邀请链，操作者为[CQ:at,qq={operator_id}][{operator_id}]，请勿在群内发送违规信息",
+                    )
+
+                if is_blacklisted(group_id, user_id):
+
+                    await set_group_kick(websocket, group_id, user_id)
+                    await set_group_kick(websocket, group_id, operator_id)
+                    logging.info(
+                        f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。"
+                    )
+                    await send_group_msg(
+                        websocket,
+                        group_id,
+                        f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。",
                     )
 
     except Exception as e:
