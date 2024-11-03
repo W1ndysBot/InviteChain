@@ -63,6 +63,29 @@ def load_InviteChain(group_id):
         return []
 
 
+# 查看某人邀请的用户
+def get_invited_users(group_id, target_user_id):
+    if not load_InviteChain_switch(group_id):
+        return None
+
+    invite_chain = load_InviteChain(group_id)
+
+    if not invite_chain:
+        return None
+
+    invited_users = [
+        inviter["user_id"]
+        for inviter in invite_chain
+        if inviter["operator_id"] == target_user_id
+    ]
+
+    if invited_users:
+        return ",".join(invited_users)
+    else:
+        return None
+
+
+# 查看邀请链
 async def view_InviteChain(websocket, group_id, target_user_id, message_id):
     if not load_InviteChain_switch(group_id):
         await send_group_msg(
