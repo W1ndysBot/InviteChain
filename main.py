@@ -201,8 +201,6 @@ async def handle_InviteChain_group_notice(websocket, msg):
         group_id = msg.get("group_id", "")
         notice_type = msg.get("notice_type", "")
 
-        # logging.info(f"操作者 {operator_id} 的角色 {operator_role}")
-
         # 限定范围，只处理入群事件
         if notice_type != "group_increase":
             return
@@ -210,6 +208,7 @@ async def handle_InviteChain_group_notice(websocket, msg):
         # 获取操作者的信息
         operator_info = await get_group_member_info(websocket, group_id, operator_id)
         operator_role = operator_info.get("data", {}).get("role", "")
+
         # 如果操作者是群主或管理或root，则不记录邀请链
         if is_authorized(operator_role, operator_id):
             logging.info(f"操作者 {operator_id} 有管理权限，不记录邀请链")
@@ -225,18 +224,20 @@ async def handle_InviteChain_group_notice(websocket, msg):
                         f"[+]已记录[CQ:at,qq={user_id}][{user_id}]的邀请链，操作者为[CQ:at,qq={operator_id}][{operator_id}]，请勿在群内发送违规信息",
                     )
 
-                if is_blacklisted(group_id, user_id):
+                    if is_blacklisted(group_id, user_id):
 
-                    await set_group_kick(websocket, group_id, user_id)
-                    await set_group_kick(websocket, group_id, operator_id)
-                    logging.info(
-                        f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。"
-                    )
-                    await send_group_msg(
-                        websocket,
-                        group_id,
-                        f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。",
-                    )
+                        await set_group_kick(websocket, group_id, user_id)
+                        await set_group_kick(websocket, group_id, operator_id)
+
+                        logging.info(
+                            f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。"
+                        )
+
+                        await send_group_msg(
+                            websocket,
+                            group_id,
+                            f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。",
+                        )
 
     except Exception as e:
         logging.error(f"处理邀请链时发生错误: {e}")
