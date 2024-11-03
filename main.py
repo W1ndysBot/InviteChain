@@ -195,11 +195,11 @@ async def handle_InviteChain_group_notice(websocket, msg):
         # 确保数据目录存在
         os.makedirs(DATA_DIR, exist_ok=True)
         # 使用get函数安全的获取参数，以防不存在导致跳出异常
-        operator_id = msg.get("operator_id", "")
-        sub_type = msg.get("sub_type", "")
-        user_id = msg.get("user_id", "")
-        group_id = msg.get("group_id", "")
-        notice_type = msg.get("notice_type", "")
+        operator_id = str(msg.get("operator_id", ""))
+        sub_type = str(msg.get("sub_type", ""))
+        user_id = str(msg.get("user_id", ""))
+        group_id = str(msg.get("group_id", ""))
+        notice_type = str(msg.get("notice_type", ""))
 
         # 限定范围，只处理入群事件
         if notice_type != "group_increase":
@@ -225,18 +225,18 @@ async def handle_InviteChain_group_notice(websocket, msg):
                     )
 
                     if is_blacklisted(group_id, user_id):
-
+                        logging.info(f"邀请链发现黑名单用户[{user_id}]，将踢出群聊。")
                         await set_group_kick(websocket, group_id, user_id)
                         await set_group_kick(websocket, group_id, operator_id)
 
                         logging.info(
-                            f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。"
+                            f"[+]发现[{operator_id}]邀请了[{user_id}]，该用户为黑名单用户，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。"
                         )
 
                         await send_group_msg(
                             websocket,
                             group_id,
-                            f"[+]发现黑名单用户[{user_id}]，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。",
+                            f"[+]发现[{operator_id}]邀请了[{user_id}]，该用户为黑名单用户，将踢出邀请者[{operator_id}]和被邀请者[{user_id}]，并不再接受入群。",
                         )
 
     except Exception as e:
