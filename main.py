@@ -261,79 +261,67 @@ iclist@查看邀请链
     await send_group_msg(websocket, group_id, message)
 
 
-# 管理邀请链
-async def handle_InviteChain_group_message(websocket, msg):
-    try:
-        user_id = str(msg.get("user_id"))
-        group_id = str(msg.get("group_id"))
-        raw_message = str(msg.get("raw_message"))
-        role = str(msg.get("sender", {}).get("role"))
-        message_id = str(msg.get("message_id"))
+# 处理邀请链群组消息
+async def handle_InviteChain_group_commands(
+    websocket, group_id, message_id, raw_message, user_id, role
+):
+    if raw_message == "invitechain":
+        await InviteChain(websocket, group_id, message_id)
+        return
 
-        if raw_message == "invitechain":
-            await InviteChain(websocket, group_id, message_id)
+    if not is_authorized(role, user_id):
+        return
 
-        if is_authorized(role, user_id):
-            # 查看邀请链
-            if raw_message.startswith("iclist"):  # 修改命令格式，去除空格
-                if load_InviteChain_switch(group_id):
-                    match = re.search(r"(\d+)", raw_message)  # 提取QQ号
-                    if match:
-                        target_user_id = match.group(1)
-                        logging.info(f"查看邀请链 {target_user_id}")
-                        await view_InviteChain(
-                            websocket, group_id, target_user_id, message_id
-                        )
-            if raw_message == "icon":
-                logging.info(f"开启邀请链 {group_id}")
-                if load_InviteChain_switch(group_id):
-                    await send_group_msg(
-                        websocket,
-                        group_id,
-                        f"[CQ:reply,id={message_id}]邀请链功能已开启，无需再次开启。",
-                    )
-                else:
-                    save_InviteChain_switch(group_id, True)
-                    await send_group_msg(
-                        websocket,
-                        group_id,
-                        f"[CQ:reply,id={message_id}]邀请链功能已开启。",
-                    )
-            if raw_message == "icoff":
-                logging.info(f"关闭邀请链 {group_id}")
-                if load_InviteChain_switch(group_id):
-                    save_InviteChain_switch(group_id, False)
-                    await send_group_msg(
-                        websocket,
-                        group_id,
-                        f"[CQ:reply,id={message_id}]邀请链功能已关闭。",
-                    )
-                else:
-                    await send_group_msg(
-                        websocket,
-                        group_id,
-                        f"[CQ:reply,id={message_id}]邀请链功能已关闭，无需再次关闭。",
-                    )
-    except Exception as e:
-        logging.error(f"处理邀请链消息时发生错误: {e}")
+    if raw_message.startswith("iclist"):
+        if load_InviteChain_switch(group_id):
+            match = re.search(r"(\d+)", raw_message)
+            if match:
+                target_user_id = match.group(1)
+                logging.info(f"查看邀请链 {target_user_id}")
+                await view_InviteChain(websocket, group_id, target_user_id, message_id)
+
+    elif raw_message == "icon":
+        logging.info(f"开启邀请链 {group_id}")
+        if not load_InviteChain_switch(group_id):
+            save_InviteChain_switch(group_id, True)
+            await send_group_msg(
+                websocket, group_id, f"[CQ:reply,id={message_id}]邀请链功能已开启。"
+            )
+        else:
+            await send_group_msg(
+                websocket,
+                group_id,
+                f"[CQ:reply,id={message_id}]邀请链功能已开启，无需再次开启。",
+            )
+
+    elif raw_message == "icoff":
+        logging.info(f"关闭邀请链 {group_id}")
+        if load_InviteChain_switch(group_id):
+            save_InviteChain_switch(group_id, False)
+            await send_group_msg(
+                websocket, group_id, f"[CQ:reply,id={message_id}]邀请链功能已关闭。"
+            )
+        else:
+            await send_group_msg(
+                websocket,
+                group_id,
+                f"[CQ:reply,id={message_id}]邀请链功能已关闭，无需再次关闭。",
+            )
 
 
 # 统一事件处理入口
 async def handle_events(websocket, msg):
     """统一事件处理入口"""
-    post_type = msg.get("post_type", "response")  # 添加默认值
+    post_type = msg.get("post_type", "response")
     try:
-        # 处理回调事件
         if msg.get("status") == "ok":
             return
 
         post_type = msg.get("post_type")
 
-        # 处理元事件
         if post_type == "meta_event":
             return
 
-        # 处理消息事件
         elif post_type == "message":
             message_type = msg.get("message_type")
             if message_type == "group":
@@ -343,59 +331,15 @@ async def handle_events(websocket, msg):
                 user_id = str(msg.get("user_id", ""))
                 role = str(msg.get("sender", {}).get("role", ""))
 
-                # 处理邀请链相关命令
-                if raw_message == "invitechain":
-                    await InviteChain(websocket, group_id, message_id)
-                elif raw_message.startswith("iclist"):
-                    if is_authorized(role, user_id):
-                        if load_InviteChain_switch(group_id):
-                            match = re.search(r"(\d+)", raw_message)
-                            if match:
-                                target_user_id = match.group(1)
-                                logging.info(f"查看邀请链 {target_user_id}")
-                                await view_InviteChain(
-                                    websocket, group_id, target_user_id, message_id
-                                )
-                elif raw_message == "icon":
-                    if is_authorized(role, user_id):
-                        logging.info(f"开启邀请链 {group_id}")
-                        if not load_InviteChain_switch(group_id):
-                            save_InviteChain_switch(group_id, True)
-                            await send_group_msg(
-                                websocket,
-                                group_id,
-                                f"[CQ:reply,id={message_id}]邀请链功能已开启。",
-                            )
-                        else:
-                            await send_group_msg(
-                                websocket,
-                                group_id,
-                                f"[CQ:reply,id={message_id}]邀请链功能已开启，无需再次开启。",
-                            )
-                elif raw_message == "icoff":
-                    if is_authorized(role, user_id):
-                        logging.info(f"关闭邀请链 {group_id}")
-                        if load_InviteChain_switch(group_id):
-                            save_InviteChain_switch(group_id, False)
-                            await send_group_msg(
-                                websocket,
-                                group_id,
-                                f"[CQ:reply,id={message_id}]邀请链功能已关闭。",
-                            )
-                        else:
-                            await send_group_msg(
-                                websocket,
-                                group_id,
-                                f"[CQ:reply,id={message_id}]邀请链功能已关闭，无需再次关闭。",
-                            )
+                await handle_InviteChain_group_commands(
+                    websocket, group_id, message_id, raw_message, user_id, role
+                )
 
             elif message_type == "private":
                 return
 
-        # 处理通知事件
         elif post_type == "notice":
-            if msg.get("notice_type") == "group":
-                return
+            await handle_InviteChain_group_notice(websocket, msg)
 
     except Exception as e:
         error_type = {
@@ -407,7 +351,6 @@ async def handle_events(websocket, msg):
 
         logging.error(f"处理InviteChain{error_type}事件失败: {e}")
 
-        # 发送错误提示
         if post_type == "message":
             message_type = msg.get("message_type")
             if message_type == "group":
